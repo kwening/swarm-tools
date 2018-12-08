@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  jenkins:
+    image: 'jenkins/jenkins:latest'
+    ports:
+      - '8081:8080'
+        #      - '443:8443'
+    volumes:
+      - 'jenkins_data:/var/jenkins_home'
+volumes:
+  jenkins_data:
+    driver: local
