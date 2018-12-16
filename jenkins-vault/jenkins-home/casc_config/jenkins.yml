@@ -1,0 +1,69 @@
+#plugins: # (1)
+#  required:
+#    git: 3.9.1
+#    pipeline-model-definition: 1.3.2
+#    pipeline-stage-step: 2.3
+#    pipeline-maven: 3.5.12
+#    workflow-aggregator: 2.5
+#    junit: 1.26.1
+#  sites:
+#  - id: "default"
+#    url: "https://updates.jenkins.io/update-center.json"
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    loggedInUsersCanDoAnything:
+      allowAnonymousRead: false
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: false
+  mode: NORMAL
+  numExecutors: 2
+  primaryView:
+    all:
+      name: "all"
+  quietPeriod: 5
+  scmCheckoutRetryCount: 0
+  securityRealm: # (2)
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+      - id: "admin"
+        password: "admin"
+  slaveAgentPort: 50000
+  views:
+  - all:
+      name: "all"
+tool:
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  jdk: # (3)
+    installations:
+    - home: "/docker-java-home"
+      name: "jdk"
+  maven: # (4)
+    installations:
+    - name: "maven"
+      properties:
+      - installSource:
+          installers:
+          - maven:
+              id: "3.5.4"
+credentials: # (5)
+  system:
+    domainCredentials:
+      - domain :
+          name: "github.com"
+          description: "GitHub"
+        credentials:
+          - usernamePassword:
+              scope: SYSTEM
+              id: github-kwening
+              username: kwening
+              password: ${githubPassword}

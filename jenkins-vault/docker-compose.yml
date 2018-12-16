@@ -1,0 +1,34 @@
+version: '3.7'
+services:
+  vault: 
+    image: "vault:latest"
+    ports:
+     - "8200:8200"
+    volumes:
+     - ./volumes/vault-file:/vault/file
+     - ./volumes/vault-logs:/vault/logs
+    cap_add:
+     - IPC_LOCK
+    environment:
+     - "VAULT_DEV_ROOT_TOKEN_ID=5bcab13b-6cf5-2f58-8b37-34dca31bebde"
+  jenkins:
+    image: "kwening/jenkins:latest"
+    ports:
+     - "8080:8080"
+    volumes:
+     - jenkins_home:/var/jenkins_home
+     - ./jenkins-home/casc_config:/usr/share/jenkins/ref/casc_config
+     - ./jenkins-home/init.groovy.d:/usr/share/jenkins/ref/init.groovy.d
+       #- ./jenkins-home/plugins.txt:/usr/share/jenkins/ref/plugins.txt
+    environment:
+     - "CASC_JENKINS_CONFIG=/var/jenkins_home/casc_config/jenkins.yml"
+     - "CASC_VAULT_TOKEN=5bcab13b-6cf5-2f58-8b37-34dca31bebde"
+     - "CASC_VAULT_PATH=/secret/data/jenkins"
+     - "CASC_VAULT_URL=http://127.0.0.1:8200"
+     - "JENKINS_PLUGINS_TXT=/var/jenkins_home/init.groovy.d/plugins.txt"
+volumes:
+  jenkins_home:
+       #  vault_logs:
+       #  vault_config:
+
+

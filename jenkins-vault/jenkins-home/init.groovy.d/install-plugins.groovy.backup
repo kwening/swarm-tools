@@ -1,0 +1,81 @@
+#!groovy
+
+import jenkins.model.*
+
+println "Installing additional plugins"
+def env = System.getenv()
+def plugins = []
+def pluginFile = new File("${env['JENKINS_HOME']}/init.groovy.d/plugins.txt")
+
+if(!pluginFile.exists()) {
+  println("No plugin.txt found at ${env['JENKINS_HOME']}/init.groovy.d/")
+}
+
+pluginFile.eachLine { line ->
+  plugins << line
+}
+
+def instance = Jenkins.getInstance()
+def pm = instance.getPluginManager()
+def uc = instance.getUpdateCenter()
+def installed = false
+
+plugins.each {
+  arr = it.split(":")
+  pluginName = arr[0]
+
+  if (!pm.getPlugin(pluginName)) {
+    if(arr.size() > 1) {
+      pluginVersion = arr[1]
+      downloadUrl = "${env['JENKINS_UC']}/download/plugins/${pluginName}/${pluginVersion}/${pluginName}.hpi"
+
+      if(download(downloadUrl, "${env['JENKINS_HOME']}/plugins/${pluginName}.hpi")) {
+        println "Downloading ${pluginName}:${pluginVersion}" 
+        installed = true
+      } else {
+        println "Failed downloading ${pluginName}:${pluginVersion}" 
+      }
+    } else {
+      def plugin = uc.getPlugin(pluginName)
+      
+      if (plugin) {
+        println "Installing ${pluginName}"
+        plugin.deploy()
+        installed = true
+      } else {
+        println "Failed installing ${pluginName}"
+      }
+    } 
+  } else {
+    println "Plugin ${pluginName} already exists"
+  }
+}
+
+instance.save()
+if (installed)
+  instance.doSafeRestart()
+
+def download( String url, String filename ) {
+  try{
+    while( url ) {
+      new URL( url ).openConnection().with { conn ->
+        conn.instanceFollowRedirects = false
+        url = conn.getHeaderField( "Location" )      
+        if( !url ) {
+          new File( filename ).withOutputStream { out ->
+            conn.inputStream.with { inp ->
+              out << inp
+              inp.close()
+              return true
+            }
+          }
+        }
+      }
+    }
+  } catch(Exception e) {
+    return false
+  }
+
+  return false
+}
+
