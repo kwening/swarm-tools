@@ -1,0 +1,70 @@
+version: '3.7'
+
+services:    
+  consul:
+    container_name: consul
+    image: consul:latest
+    ports:
+     - "8500:8500"
+     - "8300:8300"
+    volumes:
+     - consul_config:/config
+     - consul_data:/data
+    command: agent -server -data-dir=/data -bind 0.0.0.0 -client 0.0.0.0 -bootstrap-expect=1
+
+  vault:
+    container_name: vault
+    image: vault:latest
+    links:
+     - consul:consul
+    depends_on:
+     - consul
+    ports:
+      - "8200:8200"
+    volumes:
+     - consul_config:/config
+     - consul_data:/data
+    cap_add:
+      - IPC_LOCK
+    command: server -config=/config/vault.hcl
+
+  webui:
+    container_name: webui
+    image: djenriquez/vault-ui
+    ports:
+     - "8000:8000"
+    links:
+      - vault:vault
+    environment:
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      VAULT_URL_DEFAULT: http://vault:8200
+
+  backup:
+    container_name: backup
+    build: backup/
+    links:
+     - consul:consul
+    volumes:
+     - backup:/backup/
+    command: consul-backup
+
+volumes:
+  consul_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${PWD}/config"
+  consul_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${PWD}/_data/consul"
+  backup:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: "${PWD}/_data/backup"
+  
