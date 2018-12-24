@@ -33,7 +33,7 @@ jenkins:
       enableCaptcha: false
       users:
       - id: "admin"
-        password: "admin"
+        password: ${admin}
   slaveAgentPort: 50000
   views:
   - all:
@@ -66,4 +66,4 @@ credentials: # (5)
               scope: SYSTEM
               id: github-kwening
               username: kwening
-              password: ${githubPassword}
+              password: 123
