@@ -16,6 +16,10 @@ jenkins:
   authorizationStrategy:
     loggedInUsersCanDoAnything:
       allowAnonymousRead: false
+    #  authorizationStrategy:
+    #globalMatrix:
+    #  grantedPermissions:
+    #  - "Permission[class hudson.model.Hudson,Administer]:admin"    
   crumbIssuer:
     standard:
       excludeClientIPFromCrumb: false
@@ -33,7 +37,7 @@ jenkins:
       enableCaptcha: false
       users:
       - id: "admin"
-        password: ${admin}
+        password: ${user.admin}
   slaveAgentPort: 50000
   views:
   - all:
@@ -66,4 +70,4 @@ credentials: # (5)
               scope: SYSTEM
               id: github-kwening
               username: kwening
-              password: 123
+              password: ${cred.github}

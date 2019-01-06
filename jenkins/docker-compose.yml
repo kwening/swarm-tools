@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+  jenkins:
+    image: "kwening/jenkins:latest"
+    ports:
+     - "8080:8080"
+    volumes:
+     - jenkins_home:/var/jenkins_home
+     - ./jenkins-home:/usr/share/jenkins/cdc
+       #     - ./jenkins-home/casc_configs:/usr/share/jenkins/ref/casc_configs
+       #     - ./jenkins-home/init.groovy.d:/usr/share/jenkins/ref/init.groovy.d
+       #- ./jenkins-home/plugins.txt:/usr/share/jenkins/ref/plugins.txt
+    environment:
+     - "CASC_JENKINS_CONFIG=/var/jenkins_home/casc_configs/"
+     - "CASC_VAULT_TOKEN=s.4XN418xq9RxDeae9RgI2TLAd"
+     - "CASC_VAULT_PATH=/secret/jenkins"
+     - "CASC_VAULT_URL=http://vault:8200"
+     - "JENKINS_PLUGINS_TXT=/var/jenkins_home/init.groovy.d/plugins.txt"
+     - "SECRETS=/var/jenkins_home/casc_configs/secrets/"
+    networks:
+     - vault_default
+volumes:
+  jenkins_home:
+networks:
+  vault_default:
+    external: true
